@@ -1,0 +1,56 @@
+version: '3.7'
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.11.3
+    container_name: redpanda
+    command:
+        - redpanda start
+        - --overprovisioned
+        - --smp 1
+        - --memory 1G
+        - --reserve-memory 0M
+        - --node-id 0
+        - --check=false
+        - --kafka-addr 0.0.0.0:9092
+        - --advertise-kafka-addr redpanda:9092
+        - --pandaproxy-addr 0.0.0.0:8082
+        - --advertise-pandaproxy-addr redpanda:8082
+        - --set redpanda.enable_transactions=true
+        - --set redpanda.enable_idempotence=true
+        - --set redpanda.auto_create_topics_enabled=true
+    ports:
+      - "9092:9092"
+      - "8081:8081"
+      - "8082:8082"
+  risingwave:
+    image: risingwavelabs/risingwave:latest
+    container_name: risingwave
+    ports:
+      - "5691:5691"
+      - "4566:4566"
+  metabase:
+    image: metabase/metabase
+    container_name: metabase
+    depends_on:
+      - risingwave
+    ports:
+      - "3000:3000"
+  sqlpad:
+    image: sqlpad/sqlpad
+    container_name: sqlpad
+    depends_on:
+      - risingwave
+    ports:
+      - "3001:3000"
+    environment:
+     - SQLPAD_ADMIN=admin
+     - SQLPAD_ADMIN_PASSWORD=123
+  superset:
+    image: apache/superset
+    container_name: superset
+    depends_on:
+      - risingwave
+    ports:
+      - "3002:8088"
+    environment:
+     - SUPERSET_SECRET_KEY=123
