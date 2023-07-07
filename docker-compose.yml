@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   redpanda:
-    image: docker.vectorized.io/vectorized/redpanda:v21.11.3
+    image: vectorized/redpanda:latest
     container_name: redpanda
     command:
         - redpanda start
@@ -22,19 +22,27 @@ services:
       - "9092:9092"
       - "8081:8081"
       - "8082:8082"
+  console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:9092"]
+          schemaRegistry:
+            enabled: false
+    ports:
+      - 8080:8080
+    depends_on:
+      - redpanda
   risingwave:
     image: risingwavelabs/risingwave:latest
     container_name: risingwave
     ports:
       - "5691:5691"
       - "4566:4566"
-  metabase:
-    image: metabase/metabase
-    container_name: metabase
-    depends_on:
-      - risingwave
-    ports:
-      - "3000:3000"
   sqlpad:
     image: sqlpad/sqlpad
     container_name: sqlpad
@@ -45,12 +53,3 @@ services:
     environment:
      - SQLPAD_ADMIN=admin
      - SQLPAD_ADMIN_PASSWORD=123
-  superset:
-    image: apache/superset
-    container_name: superset
-    depends_on:
-      - risingwave
-    ports:
-      - "3002:8088"
-    environment:
-     - SUPERSET_SECRET_KEY=123
