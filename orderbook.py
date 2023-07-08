@@ -68,6 +68,8 @@ class OrderBook:
         # if using Python < 3.7 need to use OrderedDict here
         self.type=None
         self.time=None
+        self.last_size=None
+        self.trade_id=None
         self.price=None
         self.trade_id=None
         self.bids = {}
@@ -80,6 +82,7 @@ class OrderBook:
         self.type=data['type']
         if data['type'] == "ticker":
             self.price=data['price']
+            self.last_size=data['last_size']
             self.trade_id=data['trade_id']
         else:
             if self.bids == {}:
