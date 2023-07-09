@@ -1,9 +1,11 @@
 import json
 
 # pip install websocket-client
+# pip install confluent-kafka
 from websocket import create_connection
 
 from bytewax.connectors.stdio import StdOutput
+from bytewax.connectors.kafka import KafkaOutput
 from bytewax.dataflow import Dataflow
 from bytewax.inputs import PartitionedInput, StatefulSource
 from bytewax.testing import run_main
@@ -33,9 +35,6 @@ class CoinbaseSource(StatefulSource):
 
             )
         )
-
-        # The first msg is just a confirmation that we have subscribed.
-        #print(self.ws.recv())
 
     def next(self):
         return self.ws.recv()
@@ -81,8 +80,8 @@ class OrderBook:
         self.time=data['time']
         self.type=data['type']
         if data['type'] == "ticker":
-            self.price=data['price']
-            self.last_size=data['last_size']
+            self.price=float(data['price'])
+            self.last_size=float(data['last_size'])
             self.trade_id=data['trade_id']
         else:
             if self.bids == {}:
@@ -144,7 +143,7 @@ class OrderBook:
             "bid": self.bid_price,
             "bid_size": self.bids[self.bid_price],
             "ask": self.ask_price,
-            "ask_price": self.asks[self.ask_price],
+            "ask_size": self.asks[self.ask_price],
             "spread": self.ask_price - self.bid_price,
         }
 
@@ -171,6 +170,8 @@ flow.stateful_map("order_book", lambda: OrderBook(), OrderBook.update)
 
 flow.filter(lambda x: x[1]['type'] == 'ticker')
 flow.output("out", StdOutput())
+flow.map(lambda x: (x[0], json.dumps(x[1]).encode()))
+flow.output("out", KafkaOutput(["redpanda:9092"], "trade"))
 
 def main():
     run_main(flow)

@@ -53,3 +53,6 @@ services:
     environment:
      - SQLPAD_ADMIN=admin
      - SQLPAD_ADMIN_PASSWORD=123
+  orderbook:
+    image: orderbook:latest
+    container_name: orderbook
