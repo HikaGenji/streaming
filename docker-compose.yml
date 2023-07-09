@@ -57,7 +57,7 @@ services:
     image: backend:latest
     container_name: backend
   frontend:
-    image: frontend:v6
+    image: frontend:v7
     container_name: frontend
     ports:
       - "8501:8501"
