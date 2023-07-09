@@ -19,7 +19,7 @@ placeholder = st.empty()
 while True:
     with placeholder.container():
         data = getData()
-        fig = go.Figure(data=go.Ohlc(x=data['minute'],
+        fig = go.Figure(data=go.Candlestick(x=data['minute'],
                              open=data['open'],
                              high=data['high'],
                              low=data['low'],
