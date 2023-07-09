@@ -139,6 +139,7 @@ class OrderBook:
             "type": self.type,
             "time": self.time,
             "price": self.price,
+            "last_size": self.last_size,
             "trade_id": self.trade_id,
             "bid": self.bid_price,
             "bid_size": self.bids[self.bid_price],
@@ -167,9 +168,8 @@ flow.map(key_on_product)
 # })
 flow.stateful_map("order_book", lambda: OrderBook(), OrderBook.update)
 # ('BTC-USD', (36905.39, 0.00334873, 36905.4, 1.6e-05, 0.010000000002037268))
-flow.filter(
-    lambda x: x[-1]["spread"] / x[-1]["ask"] > 0.0001
-)  # filter on 0.1% spread as a per
+
+flow.filter(lambda x: x[1]['type'] == 'ticker')
 flow.output("out", StdOutput())
 
 def main():
