@@ -65,6 +65,7 @@ def key_on_product(data):
 class OrderBook:
     def __init__(self):
         # if using Python < 3.7 need to use OrderedDict here
+        self.product_id=None
         self.type=None
         self.time=None
         self.last_size=None
@@ -77,6 +78,7 @@ class OrderBook:
         self.ask_price = None
 
     def update(self, data):
+        self.product_id=data['product_id']
         self.time=data['time']
         self.type=data['type']
         if data['type'] == "ticker":
@@ -135,6 +137,7 @@ class OrderBook:
                         if price > self.bid_price:
                             self.bid_price = price
         return self, {
+            "product_id": self.product_id,
             "type": self.type,
             "time": self.time,
             "price": self.price,
