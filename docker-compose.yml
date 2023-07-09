@@ -51,8 +51,13 @@ services:
     ports:
       - "3001:3000"
     environment:
-     - SQLPAD_ADMIN=admin
-     - SQLPAD_ADMIN_PASSWORD=123
-  orderbook:
-    image: orderbook:latest
-    container_name: orderbook
+      - SQLPAD_ADMIN=admin
+      - SQLPAD_ADMIN_PASSWORD=123
+  backend:
+    image: backend:latest
+    container_name: backend
+  frontend:
+    image: frontend:latest
+    container_name: frontend
+    ports:
+      - "8501:8501"
